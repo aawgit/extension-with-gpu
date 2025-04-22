@@ -90,7 +90,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // Run model prediction asynchronously
   (async function () {
     // Perform classification
-    const result = await classify(message.text);
+    const result = "dummy text" //await classify(message.text);
+    await findSimilarity(message.text, "Movies")
 
     // Send response back to UI
     sendResponse(result);
@@ -101,3 +102,74 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true;
 });
 //////////////////////////////////////////////////////////////
+
+export async function similarity(text1, text2) {
+  let e0 = await embed(text1);
+  let e1 = await embed(text2);
+
+  return cosineSimilarity(e0, e1);
+}
+
+function cosineSimilarity(v1, v2) {
+  console.log(`v1 ${typeof (v1)}`)
+  console.log(`v2 ${typeof (v2)}`)
+  if (v1.length !== v2.length) {
+    return -1;
+  }
+  let dotProduct = 0;
+  let v1_mag = 0;
+  let v2_mag = 0;
+  for (let i = 0; i < v1.length; i++) {
+    dotProduct += v1[i] * v2[i];
+    v1_mag += v1[i] ** 2;
+    v2_mag += v2[i] ** 2;
+  }
+  return dotProduct / (Math.sqrt(v1_mag) * Math.sqrt(v2_mag));
+}
+
+class EmbeddingModel {
+  static task = 'feature-extraction';
+  static model = 'Xenova/all-MiniLM-L6-v2';
+
+  static async getInstance(progress_callback) {
+    // Return a function which does the following:
+    // - Load the pipeline if it hasn't been loaded yet
+    // - Run the pipeline, waiting for previous executions to finish if needed
+    return (this.fn ??= async (...args) => {
+      this.instance ??= pipeline(
+        this.task,
+        this.model,
+        {
+          progress_callback,
+          device: "webgpu",
+          // dtype: "q4",
+        },
+      );
+
+      return (this.promise_chain = (
+        this.promise_chain ?? Promise.resolve()
+      ).then(async () => (await this.instance)(...args)));
+    });
+  }
+
+}
+
+const findSimilarity = async (text1, text2) => {
+  // Get the pipeline instance. This will load and build the model when run for the first time.
+  const classifier = await EmbeddingModel.getInstance((data) => {
+    // You can track the progress of the pipeline creation here.
+    // e.g., you can send `data` back to the UI to indicate a progress bar
+    // console.log(data)
+  });
+
+  // Run the model on the input text
+  const result1 = await classifier(text1, { pooling: 'mean', normalize: true });
+  const result2 = await classifier(text2, { pooling: 'mean', normalize: true });
+  const vec1 = Array.from(result1.tolist()[0]);
+  const vec2 = Array.from(result2.tolist()[0]);
+  console.log(vec1)
+
+  const similarity = cosineSimilarity(vec1, vec2)
+  console.log(similarity)
+  return similarity;
+};
