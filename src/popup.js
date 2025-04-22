@@ -27,63 +27,6 @@ inputElement.addEventListener("input", async (event) => {
   outputElement.innerText = JSON.stringify(response, null, 2);
 });
 
-class LanguageModel {
-  static model = "Qwen2-1.5B-Instruct-q4f32_1-MLC";
-  static engine = null;
-  static instance = null;
-  static loaded = false;
-
-  constructor() {
-    if (LanguageModel.instance) {
-      throw new Error("Cannot instantiate singleton directly. Use getInstance() instead.");
-    }
-    LanguageModel.instance = this;
-  }
-
-  static async getInstance(progress_callback) {
-    if (LanguageModel.loaded) {
-      return LanguageModel.instance;
-    }
-
-    if (!LanguageModel.instance) {
-      LanguageModel.instance = new LanguageModel();
-    }
-
-    try {
-      console.log(`Creating the llm instance...`);
-
-      const engine = await CreateExtensionServiceWorkerMLCEngine(
-        LanguageModel.model,
-        {
-          initProgressCallback: (progress) => {
-            console.log(`Progress: ${progress}%`);
-            if (progress_callback) progress_callback(progress);
-          },
-        }
-      );
-
-      LanguageModel.engine = engine;
-      LanguageModel.loaded = true;
-
-      console.log(`Loaded llm instance`);
-    } catch (error) {
-      console.error("Failed to initialize language model engine:", error);
-      throw error;
-    }
-
-    return LanguageModel.instance;
-  }
-}
-
-(async () => {
-  try {
-    console.log("Preloading LanguageModel...");
-    await LanguageModel.getInstance(progress => console.log(`Loading: ${progress}%`));
-    console.log("LanguageModel ready.");
-  } catch (e) {
-    console.error("Failed to preload LanguageModel:", e);
-  }
-})();
 
 //only for testing
 // const model = await LanguageModel.getInstance(progress => console.log(`Loading: ${progress}%`));
@@ -107,4 +50,5 @@ class LanguageModel {
 //   }
 // }
 // console.log(answer)
+
 
