@@ -102,8 +102,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // Run model prediction asynchronously
   (async function () {
     // Perform classification
-    const result = "dummy text" //await classify(message.text);
-    await findSimilarity(message.text, "Movies")
+    // const result = "dummy text" //await classify(message.text);
+    const result = await findSimilarity(message.text, "Movies")
 
     // Send response back to UI
     sendResponse(result);

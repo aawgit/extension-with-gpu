@@ -4,8 +4,10 @@ This is based on the example project to show how to run 🤗 Transformers in a b
 transformers.js-examples/browser-extension/
 
 TODO:
+ - Add a button instead of triggering from typing
  - Remove unncessary parts of the code
  - Refactor to appropriate files (background.js, popup.js)
  - Make sure models are loaded before user can triggers any action
  - Loading animation
- 
+ - May be load both models simultaniously
+ - Create a minimalist boilerplate for this kind of extensions

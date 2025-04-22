@@ -11,21 +11,25 @@ import { ACTION_NAME } from "./constants.js";
 
 const inputElement = document.getElementById("text");
 const outputElement = document.getElementById("output");
+const buttonElement = document.getElementById("run-button");
 
-// Listen for changes made to the textbox.
-inputElement.addEventListener("input", async (event) => {
-  // Bundle the input data into a message.
+buttonElement.addEventListener("click", async () => {
+  const inputText = inputElement.value.trim();
+  if (!inputText) return;
+
   const message = {
     action: ACTION_NAME,
-    text: event.target.value,
+    text: inputText,
   };
 
-  // Send this message to the service worker.
-  const response = await chrome.runtime.sendMessage(message);
-
-  // Handle results returned by the service worker (`background.js`) and update the popup's UI.
-  outputElement.innerText = JSON.stringify(response, null, 2);
+  try {
+    const response = await chrome.runtime.sendMessage(message);
+    outputElement.innerText = JSON.stringify(response, null, 2);
+  } catch (error) {
+    outputElement.innerText = `Error: ${error.message}`;
+  }
 });
+
 
 
 //only for testing
