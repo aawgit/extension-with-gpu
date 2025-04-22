@@ -173,3 +173,13 @@ const findSimilarity = async (text1, text2) => {
   console.log(similarity)
   return similarity;
 };
+
+
+chrome.sidePanel
+  .setPanelBehavior({ openPanelOnActionClick: true })
+  .catch((error) => console.error(error));
+
+// chrome.action.onClicked.addListener((tab) => {
+//     // This opens the side panel when the extension icon is clicked
+//     chrome.sidePanel.open({ tabId: tab.id });
+//   });
