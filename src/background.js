@@ -4,6 +4,8 @@ import { pipeline } from "@huggingface/transformers";
 
 import { CONTEXT_MENU_ITEM_ID } from "./constants.js";
 
+import { ExtensionServiceWorkerMLCEngineHandler } from "@mlc-ai/web-llm";
+
 /**
  * Wrap the pipeline construction in a Singleton class to ensure:
  * (1) the pipeline is only loaded once, and
@@ -84,9 +86,13 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 ////////////////////// 2. Message Events /////////////////////
 //
 // Listen for messages from the UI, process it, and send the result back.
+let loaded = false
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action !== "classify") return; // Ignore messages that are not meant for classification.
-
+  // if(!loaded){
+  //   LanguageModel.getInstance(progress => console.log(`Loading: ${progress}%`));
+  //   return true
+  // }
   // Run model prediction asynchronously
   (async function () {
     // Perform classification
@@ -183,3 +189,21 @@ chrome.sidePanel
 //     // This opens the side panel when the extension icon is clicked
 //     chrome.sidePanel.open({ tabId: tab.id });
 //   });
+
+
+// Hookup an engine to a service worker handler
+let handler;
+
+chrome.runtime.onConnect.addListener(function (port) {
+  console.assert(port.name === "web_llm_service_worker");
+  if (handler === undefined) {
+    handler = new ExtensionServiceWorkerMLCEngineHandler(port);
+  } else {
+    handler.setPort(port);
+  }
+  port.onMessage.addListener(handler.onmessage.bind(handler));
+});
+
+
+
+

@@ -10,7 +10,8 @@
   "author": "Hugging Face",
   "license": "Apache-2.0",
   "dependencies": {
-    "@huggingface/transformers": "^3.0.2"
+    "@huggingface/transformers": "^3.0.2",
+    "@mlc-ai/web-llm": "^0.2.78"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^12.0.2",
