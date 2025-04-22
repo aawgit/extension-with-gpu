@@ -10,3 +10,23 @@
 // }
 // const response = await chrome.runtime.sendMessage(message);
 // console.log('received user data', response)
+
+// let pageText = document.body.innerText || "";
+// let pageTitle = document.title || "";
+// let pageBody = document.body.textContent | "";
+
+// // TODO: Extract headings
+// chrome.runtime.sendMessage({
+//     type: "tabData",
+//     url: window.location.href,
+//     text: pageText.substring(0, 200),
+//     title: pageTitle,
+//     content: pageBody
+// });
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "GET_PAGE_CONTENT") {
+      const bodyText = document.body.innerText || "";
+      sendResponse({ text: bodyText.substring(0, 200) });
+    }
+  });

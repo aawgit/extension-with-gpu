@@ -48,3 +48,30 @@ body {
   font-family: "Roboto Mono", monospace;
   height: 100px;
 }
+
+#run-button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #4f46e5; /* Indigo-600 */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+#run-button:hover {
+  background-color: #4338ca; /* Indigo-700 */
+}
+
+#run-button:active {
+  transform: scale(0.97);
+}
+
+#run-button:disabled {
+  background-color: #a5b4fc; /* Indigo-300 */
+  cursor: not-allowed;
+}
+

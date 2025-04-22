@@ -1,4 +1,4 @@
-# rowser extension TODO: Change the name
+# Browser extension TODO: Change the name
 
 This is based on the example project to show how to run 🤗 Transformers in a browser extension.  https://github.com/huggingface/transformers.js-examples.git
 transformers.js-examples/browser-extension/
