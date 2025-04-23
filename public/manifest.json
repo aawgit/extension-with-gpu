@@ -10,7 +10,8 @@
     "storage",
     "unlimitedStorage",
     "sidePanel",
-    "webNavigation"
+    "webNavigation",
+    "bookmarks"
   ],
   "background": {
     "service_worker": "background.js",

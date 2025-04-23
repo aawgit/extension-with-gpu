@@ -2,7 +2,8 @@
 
 import { ExtensionServiceWorkerMLCEngineHandler } from "@mlc-ai/web-llm";
 import { cosineSimilarity } from "./utils.js";
-import { EmbeddingModel, LanguageModel } from "../models.js";
+import { EmbeddingModel, LanguageModel } from "./models.js";
+import {getSummerizationPrmpt} from "./prompts.js"
 
 chrome.sidePanel
   .setPanelBehavior({ openPanelOnActionClick: true })
@@ -20,10 +21,6 @@ chrome.runtime.onConnect.addListener(function (port) {
   }
   port.onMessage.addListener(handler.onmessage.bind(handler));
 });
-
-
-
-
 
 // Listen for messages from the UI, process it, and send the result back.
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -46,36 +43,59 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 //////////////////////////////////////////////////////////////
 
 
-const getFolderName = async (message) => {
-  console.log(message)
-  // const pageSummary = await getPageSummary()
-  // const folderName = await findFolder(pageSummary)
-  return 0 //folderName
+const getFolderName = async (content) => {
+  const pageSummary = await getPageSummary(content)
+  const bookmarkFolders = await getBookmarkFolders()
+  console.log(bookmarkFolders)
+  // const folderName = await findFolder(pageSummary, bookmarkFolders)
+  return 'wow!' //folderName
 };
 
-const getPageSummary = async () => {
+const getPageSummary = async (pageContent) => {
   const model = await LanguageModel.getInstance(progress => console.log(`Loading: ${progress}%`));
-  let prompt = `Hi! How are you?`
-  let curMessage = ""
+  let prompt = getSummerizationPrmpt(pageContent.url, pageContent.title, pageContent.text)
   const completion = await model.engine.chat.completions.create({
     stream: true,
     messages: [{ role: "user", content: prompt }],
   });
-  curMessage = `prompt: ${prompt}
-  res: `
-
   // Update the answer as the model generates more text
   let answer = ""
   for await (const chunk of completion) {
     const curDelta = chunk.choices[0].delta.content;
     if (curDelta) {
-      curMessage += curDelta;
       answer += curDelta
     }
   }
   console.log(answer)
   return answer
 }
+
+const getBookmarkFolders = async () => {
+  return new Promise((resolve, reject) => {
+    chrome.bookmarks.getTree((bookmarkTreeNodes) => {
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError);
+        return;
+      }
+
+      const folders = [];
+
+      const traverse = (nodes) => {
+        for (const node of nodes) {
+          if (node.children) {
+            // It's a folder
+            folders.push(node.title);
+            traverse(node.children); // Recurse into folder
+          }
+        }
+      };
+
+      traverse(bookmarkTreeNodes);
+      resolve(folders);
+    });
+  });
+};
+
 
 const findFolder = async (pageSummary, text2) => {
 // Get the pipeline instance. This will load and build the model when run for the first time.
