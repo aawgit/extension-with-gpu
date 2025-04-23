@@ -4,6 +4,7 @@ import { ExtensionServiceWorkerMLCEngineHandler } from "@mlc-ai/web-llm";
 import { cosineSimilarity } from "./utils.js";
 import { EmbeddingModel, LanguageModel } from "./models.js";
 import {getSummerizationPrmpt} from "./prompts.js"
+import { getBookmarkFolders } from "./bookmarks.js";
 
 chrome.sidePanel
   .setPanelBehavior({ openPanelOnActionClick: true })
@@ -44,11 +45,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 
 const getFolderName = async (content) => {
-  const pageSummary = await getPageSummary(content)
+  const pageSummary = "donkey" //await getPageSummary(content)
   const bookmarkFolders = await getBookmarkFolders()
   console.log(bookmarkFolders)
-  // const folderName = await findFolder(pageSummary, bookmarkFolders)
-  return 'wow!' //folderName
+  const folderName = await findFolder(pageSummary, bookmarkFolders)
+  return folderName
 };
 
 const getPageSummary = async (pageContent) => {
@@ -70,56 +71,34 @@ const getPageSummary = async (pageContent) => {
   return answer
 }
 
-const getBookmarkFolders = async () => {
-  return new Promise((resolve, reject) => {
-    chrome.bookmarks.getTree((bookmarkTreeNodes) => {
-      if (chrome.runtime.lastError) {
-        reject(chrome.runtime.lastError);
-        return;
-      }
-
-      const folders = [];
-
-      const traverse = (nodes) => {
-        for (const node of nodes) {
-          if (node.children) {
-            // It's a folder
-            folders.push(node.title);
-            traverse(node.children); // Recurse into folder
-          }
-        }
-      };
-
-      traverse(bookmarkTreeNodes);
-      resolve(folders);
-    });
+const findFolder = async (pageSummary, folders) => {
+  const classifier = await EmbeddingModel.getInstance((data) => {
+    // Optional: track loading progress
   });
+
+  // Get embedding for the page summary
+  const pageResult = await classifier(pageSummary, { pooling: 'mean', normalize: true });
+  const pageVector = Array.from(pageResult.tolist()[0]);
+  // console.log(pageVector)
+  let bestMatch = null;
+  let highestSimilarity = 0;
+
+  // Loop over all folders and find the one with highest similarity
+  for (const folder of folders) {
+    const folderResult = await classifier(folder, { pooling: 'mean', normalize: true });
+    const folderVector = Array.from(folderResult.tolist()[0]);
+    // console.log(folderVector)
+    const similarity = cosineSimilarity(pageVector, folderVector);
+    console.log(similarity)
+    if (similarity > highestSimilarity) {
+      highestSimilarity = similarity;
+      bestMatch = folder;
+    }
+  }
+  console.log(bestMatch)
+  console.log(highestSimilarity)
+  return highestSimilarity >= 0.5 ? bestMatch : null;
 };
 
-
-const findFolder = async (pageSummary, text2) => {
-// Get the pipeline instance. This will load and build the model when run for the first time.
-const classifier = await EmbeddingModel.getInstance((data) => {
-  // You can track the progress of the pipeline creation here.
-  // e.g., you can send `data` back to the UI to indicate a progress bar
-  // console.log(data)
-});
-
-// Run the model on the input text
-const result1 = await classifier(pageSummary, { pooling: 'mean', normalize: true });
-const result2 = await classifier(text2, { pooling: 'mean', normalize: true });
-const vec1 = Array.from(result1.tolist()[0]);
-const vec2 = Array.from(result2.tolist()[0]);
-console.log(vec1)
-
-const similarity = cosineSimilarity(vec1, vec2)
-console.log(similarity)
-
-
-
-
-
-return similarity;
-}
 
 
