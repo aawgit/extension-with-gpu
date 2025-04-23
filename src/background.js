@@ -34,7 +34,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const folderName = await createBookmark(message)
 
     // Send response back to UI
-    sendResponse('wow!');
+    sendResponse(folderName);
   })();
 
   // return true to indicate we will send a response asynchronously
@@ -43,18 +43,48 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 //////////////////////////////////////////////////////////////
 
-const createBookmark = async(pageContent) => {
-  const pageSummary = await getPageSummary(pageContent)
-  const bookmarkFolders = await getBookmarkFolders()
-  const folderName = await findFolder(pageSummary, bookmarkFolders)
-  if(!folderName){
-    // TODO: create a new folder with pageSummary as name and put the url
+const createBookmark = async (pageContent) => {
+  const pageSummary = await getPageSummary(pageContent);
+  const bookmarkFolders = await getBookmarkFolders();
+  const folderName = await findFolder(pageSummary, bookmarkFolders);
+
+  let folderId = null;
+
+  if (!folderName) {
+    // Create new folder with the summary as name
+    const newFolder = await new Promise((resolve) => {
+      chrome.bookmarks.create({ title: pageSummary }, resolve);
+    });
+    folderId = newFolder.id;
+  } else {
+    // Find folderId from folderName
+    const folders = await chrome.bookmarks.getTree();
+    const stack = [...folders];
+
+    while (stack.length) {
+      const node = stack.pop();
+      if (node.title === folderName && node.children) {
+        folderId = node.id;
+        break;
+      }
+      if (node.children) stack.push(...node.children);
+    }
   }
-  else{
-    // TODO: put the bookmark in to folder
+
+  // Add the bookmark to the folder
+  if (folderId) {
+    await new Promise((resolve) => {
+      chrome.bookmarks.create({
+        parentId: folderId,
+        title: pageContent.title,
+        url: pageContent.url
+      }, resolve);
+    });
   }
-  return folderName
-}
+
+  return folderName || pageSummary; // If new folder was made, return its name
+};
+
 
 
 const getPageSummary = async (pageContent) => {
