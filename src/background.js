@@ -31,10 +31,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   (async function () {
     // Perform classification
     // const result = "dummy text" //await classify(message.text);
-    const result = await getFolderName(message, "Movies")
+    const folderName = await createBookmark(message)
 
     // Send response back to UI
-    sendResponse(result);
+    sendResponse('wow!');
   })();
 
   // return true to indicate we will send a response asynchronously
@@ -43,14 +43,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 //////////////////////////////////////////////////////////////
 
-
-const getFolderName = async (content) => {
-  const pageSummary = "donkey" //await getPageSummary(content)
+const createBookmark = async(pageContent) => {
+  const pageSummary = await getPageSummary(pageContent)
   const bookmarkFolders = await getBookmarkFolders()
-  console.log(bookmarkFolders)
   const folderName = await findFolder(pageSummary, bookmarkFolders)
+  if(!folderName){
+    // TODO: create a new folder with pageSummary as name and put the url
+  }
+  else{
+    // TODO: put the bookmark in to folder
+  }
   return folderName
-};
+}
+
 
 const getPageSummary = async (pageContent) => {
   const model = await LanguageModel.getInstance(progress => console.log(`Loading: ${progress}%`));
@@ -72,33 +77,42 @@ const getPageSummary = async (pageContent) => {
 }
 
 const findFolder = async (pageSummary, folders) => {
-  const classifier = await EmbeddingModel.getInstance((data) => {
-    // Optional: track loading progress
-  });
+  const classifier = await EmbeddingModel.getInstance();
 
-  // Get embedding for the page summary
+  // Get page vector
   const pageResult = await classifier(pageSummary, { pooling: 'mean', normalize: true });
   const pageVector = Array.from(pageResult.tolist()[0]);
-  // console.log(pageVector)
+
   let bestMatch = null;
   let highestSimilarity = 0;
 
-  // Loop over all folders and find the one with highest similarity
   for (const folder of folders) {
+    if (typeof folder !== 'string' || !folder.trim()) continue;
+
     const folderResult = await classifier(folder, { pooling: 'mean', normalize: true });
     const folderVector = Array.from(folderResult.tolist()[0]);
-    // console.log(folderVector)
+
+    // Defensive check
+    if (folderVector.length !== pageVector.length) {
+      console.warn(`Skipping folder "${folder}" due to vector length mismatch.`);
+      continue;
+    }
+
     const similarity = cosineSimilarity(pageVector, folderVector);
-    console.log(similarity)
-    if (similarity > highestSimilarity) {
+    console.log(`Similarity with "${folder}": ${similarity}`);
+
+    if (similarity >= highestSimilarity) {
       highestSimilarity = similarity;
       bestMatch = folder;
+      console.log(`--> New best match: "${bestMatch}" with similarity: ${highestSimilarity}`);
     }
   }
-  console.log(bestMatch)
-  console.log(highestSimilarity)
+
+  console.log("Final bestMatch:", bestMatch, "with similarity:", highestSimilarity);
+
   return highestSimilarity >= 0.5 ? bestMatch : null;
 };
+
 
 
 
