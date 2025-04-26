@@ -5,6 +5,7 @@ import { cosineSimilarity } from "./utils.js";
 import { EmbeddingModel, LanguageModel } from "./models.js";
 import {getSummerizationPrmpt} from "./prompts.js"
 import { getBookmarkFolders } from "./bookmarks.js";
+import {ACTIONS} from "./constants.js"
 
 chrome.sidePanel
   .setPanelBehavior({ openPanelOnActionClick: true })
@@ -25,39 +26,48 @@ chrome.runtime.onConnect.addListener(function (port) {
 
 // Listen for messages from the UI, process it, and send the result back.
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action !== "classify") return; // Ignore messages that are not meant for classification.
-  
-  // Run model prediction asynchronously
-  (async function () {
-    // Perform classification
-    // const result = "dummy text" //await classify(message.text);
-    const folderName = await createBookmark(message)
+  if (message.action === ACTIONS.GET_FOLDER_NAME) {
+    (async function () {
+      const pageSummary = await getPageSummary(message);
+      const bookmarkFolders = await getBookmarkFolders();
+      const folderName = await findFolder(pageSummary, bookmarkFolders);
 
-    // Send response back to UI
-    sendResponse(folderName);
-  })();
+      const isExistingFolder = folderName ? true : false;
+      const allFolders = bookmarkFolders;
 
-  // return true to indicate we will send a response asynchronously
-  // see https://stackoverflow.com/a/46628145 for more information
-  return true;
+      sendResponse({
+        suggestedFolderName: folderName || pageSummary,
+        isExistingFolder,
+        allFolders,
+      });
+    })();
+    return true;
+  } else if (message.action === ACTIONS.CONFIRM_BOOKMARK) {
+    (async function () {
+      await createBookmarkConfirmed(message);
+      sendResponse({ success: true });
+    })();
+    return true;
+  }
 });
+
 //////////////////////////////////////////////////////////////
 
-const createBookmark = async (pageContent) => {
-  const pageSummary = await getPageSummary(pageContent);
-  const bookmarkFolders = await getBookmarkFolders();
-  const folderName = await findFolder(pageSummary, bookmarkFolders);
+const createBookmarkConfirmed = async (message) => {
+  console.log(message)
+  const {folderName, pageContent, createNew} = message
+  if (!pageContent || !pageContent.url || !pageContent.title) {
+    throw new Error("Invalid page content: missing title or url.");
+  }
 
   let folderId = null;
 
-  if (!folderName) {
-    // Create new folder with the summary as name
-    const newFolder = await new Promise((resolve) => {
-      chrome.bookmarks.create({ title: pageSummary }, resolve);
-    });
+  if (createNew) {
+    // Create a new folder
+    const newFolder = await chrome.bookmarks.create({ title: folderName });
     folderId = newFolder.id;
   } else {
-    // Find folderId from folderName
+    // Find an existing folder by name
     const folders = await chrome.bookmarks.getTree();
     const stack = [...folders];
 
@@ -69,20 +79,18 @@ const createBookmark = async (pageContent) => {
       }
       if (node.children) stack.push(...node.children);
     }
+
+    if (!folderId) {
+      throw new Error(`Folder "${folderName}" not found.`);
+    }
   }
 
-  // Add the bookmark to the folder
-  if (folderId) {
-    await new Promise((resolve) => {
-      chrome.bookmarks.create({
-        parentId: folderId,
-        title: pageContent.title,
-        url: pageContent.url
-      }, resolve);
-    });
-  }
-
-  return folderName || pageSummary; // If new folder was made, return its name
+  // Add the actual page bookmark under the folder
+  await chrome.bookmarks.create({
+    parentId: folderId,
+    title: pageContent.title,
+    url: pageContent.url,
+  });
 };
 
 
@@ -90,6 +98,7 @@ const createBookmark = async (pageContent) => {
 const getPageSummary = async (pageContent) => {
   const model = await LanguageModel.getInstance(progress => console.log(`Loading: ${progress}%`));
   let prompt = getSummerizationPrmpt(pageContent.url, pageContent.title, pageContent.text)
+  console.log(prompt)
   const completion = await model.engine.chat.completions.create({
     stream: true,
     messages: [{ role: "user", content: prompt }],

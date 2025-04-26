@@ -1,2 +1,5 @@
-export const CONTEXT_MENU_ITEM_ID = "classify-selection";
-export const ACTION_NAME = "classify";
+export const ACTIONS = {
+    GET_FOLDER_NAME: "get_folder_name",
+    CONFIRM_BOOKMARK: "confirm_bookmark",
+    CREATE_FOLDER: "create_folder",
+}
