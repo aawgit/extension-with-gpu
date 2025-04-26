@@ -4,15 +4,14 @@
 import { ACTIONS } from "./constants.js";
 
 const outputElement = document.getElementById("output");
-const buttonElement = document.getElementById("run-button");
+const runButton = document.getElementById("run-button");
 
-buttonElement.disabled = false;
-outputElement.innerText = "Loading...";
+runButton.disabled = false;
 
-buttonElement.addEventListener("click", async () => {
+runButton.addEventListener("click", async () => {
   try {
-    buttonElement.disabled = true;
-    outputElement.innerText = "Loading...";
+    runButton.disabled = true;
+    outputElement.innerText = "Running... If this is the first time, it could take a few minutes to download the model...";
 
     // Get active tab
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -43,7 +42,7 @@ buttonElement.addEventListener("click", async () => {
   } catch (error) {
     outputElement.innerText = `Error: ${error.message}`;
   } finally {
-    buttonElement.disabled = false;
+    runButton.disabled = false;
   }
 });
 
@@ -55,7 +54,7 @@ function showOptions(suggestedFolderName, isExistingFolder, allFolders, tabConte
   const heading = document.createElement("h3");
   heading.innerText = isExistingFolder
     ? `Suggested folder: "${suggestedFolderName}"`
-    : `No matching folder found. Will create: "${suggestedFolderName}"`;
+    : `No matching folder found. I will create: "${suggestedFolderName}"`;
   optionsDiv.appendChild(heading);
 
   const bookmarkBtn = document.createElement("button");
@@ -67,7 +66,7 @@ function showOptions(suggestedFolderName, isExistingFolder, allFolders, tabConte
       pageContent: tabContent,
       createNew: !isExistingFolder
     });
-    outputElement.innerText = "Bookmark added!";
+    outputElement.innerText = `Bookmarked in ${suggestedFolderName}`;
     optionsDiv.style.display = "none";
   };
   optionsDiv.appendChild(bookmarkBtn);
@@ -84,19 +83,50 @@ function showFolderSelection(folders, pageContent) {
   const optionsDiv = document.getElementById("options");
   optionsDiv.innerHTML = "<h3>Select a folder:</h3>";
 
+  const form = document.createElement("form");
+  form.id = "folder-selection-form";
+
   folders.forEach(folder => {
-    const btn = document.createElement("button");
-    btn.innerText = folder.title;
-    btn.onclick = async () => {
-      await chrome.runtime.sendMessage({
-        action: ACTIONS.CONFIRM_BOOKMARK,
-        folderName: folder.title,
-        pageContent: pageContent,
-        createNew: false
-      });
-      outputElement.innerText = `Bookmarked in "${folder.title}"!`;
-      optionsDiv.style.display = "none";
-    };
-    optionsDiv.appendChild(btn);
+    const label = document.createElement("label");
+    label.style.display = "block";
+    label.style.margin = "5px 0";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "radio";  // radio button to select only one
+    checkbox.name = "folder"; // all belong to the same group
+    checkbox.value = folder;
+
+    label.appendChild(checkbox);
+    label.appendChild(document.createTextNode(folder));
+    form.appendChild(label);
   });
+
+  const confirmButton = document.createElement("button");
+  confirmButton.type = "button";
+  confirmButton.innerText = "Confirm";
+  confirmButton.style.marginTop = "10px";
+
+  confirmButton.onclick = async () => {
+    const selectedFolder = form.querySelector('input[name="folder"]:checked');
+    if (!selectedFolder) {
+      alert("Please select a folder first.");
+      return;
+    }
+
+    const folderName = selectedFolder.value;
+
+    await chrome.runtime.sendMessage({
+      action: ACTIONS.CONFIRM_BOOKMARK,
+      folderName: folderName,
+      pageContent: pageContent,
+      createNew: false
+    });
+
+    outputElement.innerText = `Bookmarked in "${folderName}"`;
+    optionsDiv.style.display = "none";
+  };
+
+  optionsDiv.appendChild(form);
+  optionsDiv.appendChild(confirmButton);
 }
+

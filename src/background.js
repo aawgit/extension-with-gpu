@@ -29,11 +29,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === ACTIONS.GET_FOLDER_NAME) {
     (async function () {
       const pageSummary = await getPageSummary(message);
-      const bookmarkFolders = await getBookmarkFolders();
-      const folderName = await findFolder(pageSummary, bookmarkFolders);
+      const allFoldersRaw = await getBookmarkFolders();
+      // TODO: Check the meaning and importance of folders with empty names
+      const folders = allFoldersRaw.filter(folder => typeof folder === "string" && folder.trim() !== "");
+      console.log(`folders: ${folders}`)
+      const folderName = await findFolder(pageSummary, folders);
 
       const isExistingFolder = folderName ? true : false;
-      const allFolders = bookmarkFolders;
+      const allFolders = folders;
 
       sendResponse({
         suggestedFolderName: folderName || pageSummary,
