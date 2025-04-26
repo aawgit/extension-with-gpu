@@ -3,15 +3,15 @@
 
 import { ACTIONS } from "./constants.js";
 
-const outputElement = document.getElementById("output");
 const runButton = document.getElementById("run-button");
+const outputDiv = document.getElementById("output");
 
 runButton.disabled = false;
 
 runButton.addEventListener("click", async () => {
   try {
     runButton.disabled = true;
-    outputElement.innerText = "Running... If this is the first time, it could take a few minutes to download the model...";
+    outputDiv.innerText = "Running... If this is the first time, it could take a few minutes to download the model...";
 
     // Get active tab
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -36,26 +36,24 @@ runButton.addEventListener("click", async () => {
     const response = await chrome.runtime.sendMessage(message);
     console.log(JSON.stringify(response))
     const { suggestedFolderName, isExistingFolder, allFolders } = response;
-    outputElement.innerText = "";
+    outputDiv.innerText = "";
     // Show options
     showOptions(suggestedFolderName, isExistingFolder, allFolders, tabContent);
   } catch (error) {
-    outputElement.innerText = `Error: ${error.message}`;
+    outputDiv.innerText = `Error: ${error.message}`;
   } finally {
     runButton.disabled = false;
   }
 });
 
 function showOptions(suggestedFolderName, isExistingFolder, allFolders, tabContent) {
-  const optionsDiv = document.getElementById("options");
-  optionsDiv.innerHTML = ""; // Clear previous
-  optionsDiv.style.display = "block";
+  outputDiv.innerHTML = ""; // Clear previous
 
   const heading = document.createElement("h3");
   heading.innerText = isExistingFolder
     ? `Suggested folder: "${suggestedFolderName}"`
     : `No matching folder found. I will create: "${suggestedFolderName}"`;
-  optionsDiv.appendChild(heading);
+  outputDiv.appendChild(heading);
 
   const bookmarkBtn = document.createElement("button");
   bookmarkBtn.innerText = isExistingFolder ? "Bookmark here" : "Create and Bookmark";
@@ -66,22 +64,20 @@ function showOptions(suggestedFolderName, isExistingFolder, allFolders, tabConte
       pageContent: tabContent,
       createNew: !isExistingFolder
     });
-    outputElement.innerText = `Bookmarked in ${suggestedFolderName}`;
-    optionsDiv.style.display = "none";
+    outputDiv.innerText = `Bookmarked in ${suggestedFolderName}`;
   };
-  optionsDiv.appendChild(bookmarkBtn);
+  outputDiv.appendChild(bookmarkBtn);
 
   const selectFolderBtn = document.createElement("button");
   selectFolderBtn.innerText = "Select different folder";
   selectFolderBtn.onclick = () => {
     showFolderSelection(allFolders, tabContent);
   };
-  optionsDiv.appendChild(selectFolderBtn);
+  outputDiv.appendChild(selectFolderBtn);
 }
 
 function showFolderSelection(folders, pageContent) {
-  const optionsDiv = document.getElementById("options");
-  optionsDiv.innerHTML = "<h3>Select a folder:</h3>";
+  outputDiv.innerHTML = "<h3>Select a folder:</h3>";
 
   const form = document.createElement("form");
   form.id = "folder-selection-form";
@@ -122,11 +118,10 @@ function showFolderSelection(folders, pageContent) {
       createNew: false
     });
 
-    outputElement.innerText = `Bookmarked in "${folderName}"`;
-    optionsDiv.style.display = "none";
+    outputDiv.innerText = `Bookmarked in "${folderName}"`;
   };
 
-  optionsDiv.appendChild(form);
-  optionsDiv.appendChild(confirmButton);
+  outputDiv.appendChild(form);
+  outputDiv.appendChild(confirmButton);
 }
 

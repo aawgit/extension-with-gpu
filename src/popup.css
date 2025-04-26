@@ -1,33 +1,19 @@
-/* Styles go here */
-
+/* Reset */
 * {
   padding: 0;
   margin: 0;
   box-sizing: border-box;
-  font-family: "Roboto", sans-serif;
-}
-
-h1 {
-  font-size: 40px;
-  text-align: center;
-  font-weight: 500;
-}
-
-h2 {
-  font-size: 20px;
-  text-align: center;
+  font-family:"Lexend", Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   font-weight: 400;
-  margin-bottom: 16px;
+  line-height: 1.5;
 }
 
-.container {
-  width: 360px;
-}
-
+/* Body and container */
 html,
 body {
-  min-width: 400px;
-  min-height: 500px;
+  min-width: 300px;
+  /* min-height: 500px; */
+  background-color: #f9fafb;
 }
 
 body {
@@ -36,22 +22,30 @@ body {
   align-items: center;
 }
 
-#text {
-  width: 100%;
-  padding: 8px;
-  font-size: 20px;
-  margin-bottom: 8px;
+.container {
+  width: 360px;
+  padding: 20px;
 }
 
-#output {
-  font-size: 20px;
-  font-family: "Roboto Mono", monospace;
-  height: 100px;
+/* Headings */
+h1 {
+  font-size: 32px;
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: 20px;
 }
 
-#run-button {
-  margin-top: 10px;
-  padding: 8px 16px;
+h2, h3 {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 12px;
+  color: #374151; /* Slate-700 */
+}
+
+/* Buttons */
+button {
+  display: inline-block;
+  padding: 10px 20px;
   background-color: #4f46e5; /* Indigo-600 */
   color: white;
   border: none;
@@ -60,18 +54,59 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.1s ease;
+  margin: 5px;
 }
 
-#run-button:hover {
+button:hover {
   background-color: #4338ca; /* Indigo-700 */
 }
 
-#run-button:active {
+button:active {
   transform: scale(0.97);
 }
 
-#run-button:disabled {
+button:disabled {
   background-color: #a5b4fc; /* Indigo-300 */
   cursor: not-allowed;
 }
 
+/* Output message styling */
+#output {
+  margin-top: 15px;
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  min-height: 60px;
+  display: block;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Radio button group */
+#folder-selection-form label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+#folder-selection-form input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: #fff;
+  border: 2px solid #cbd5e1; /* Slate-300 */
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  margin-right: 10px;
+  position: relative;
+}
+
+#folder-selection-form input[type="radio"]:checked {
+  border: 5px solid #4f46e5; /* Indigo-600 */
+}
+
+#folder-selection-form input[type="radio"]:hover {
+  border-color: #4f46e5;
+}
