@@ -3,7 +3,7 @@
   padding: 0;
   margin: 0;
   box-sizing: border-box;
-  font-family:"Lexend", Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Lexend", Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   font-weight: 400;
   line-height: 1.5;
 }
@@ -12,14 +12,14 @@
 html,
 body {
   min-width: 300px;
-  /* min-height: 500px; */
   background-color: #f9fafb;
 }
 
 body {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: start;
+  padding-top: 40px;
 }
 
 .container {
@@ -29,84 +29,106 @@ body {
 
 /* Headings */
 h1 {
-  font-size: 32px;
+  font-size: 28px;
   text-align: center;
   font-weight: 600;
-  margin-bottom: 20px;
-}
-
-h2, h3 {
-  font-size: 18px;
-  font-weight: 500;
-  margin-bottom: 12px;
-  color: #374151; /* Slate-700 */
+  margin-bottom: 24px;
+  color: #1f2937;
 }
 
 /* Buttons */
 button {
   display: inline-block;
   padding: 10px 20px;
-  background-color: #4f46e5; /* Indigo-600 */
+  background-color: #4f46e5;
   color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 14px;
+  border-radius: 8px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.1s ease;
-  margin: 5px;
+  margin-bottom: 16px;
+  width: 100%;
 }
 
 button:hover {
-  background-color: #4338ca; /* Indigo-700 */
+  background-color: #4338ca;
 }
 
 button:active {
-  transform: scale(0.97);
+  transform: scale(0.98);
 }
 
 button:disabled {
-  background-color: #a5b4fc; /* Indigo-300 */
+  background-color: #a5b4fc;
   cursor: not-allowed;
 }
 
-/* Output message styling */
+/* Output Section */
 #output {
-  margin-top: 15px;
-  padding: 12px 16px;
-  border-radius: 6px;
+  margin-top: 16px;
+  padding: 20px 16px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   font-size: 14px;
-  min-height: 60px;
-  display: block;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
+  color: #374151;
+  display: none; /* Initially hidden */
+  flex-direction: column;
+  gap: 16px;
 }
 
-/* Radio button group */
+/* Show output when it has content */
+#output.active {
+  display: flex;
+}
+
 #folder-selection-form label {
   display: flex;
-  align-items: center;
-  margin-bottom: 10px;
+  align-items: center; /* aligns vertically */
+  gap: 10px;
   font-size: 14px;
+  font-weight: 500;
+  color: #374151;
   cursor: pointer;
+  line-height: 1; /* Add this! */
 }
 
 #folder-selection-form input[type="radio"] {
   appearance: none;
   -webkit-appearance: none;
   background-color: #fff;
-  border: 2px solid #cbd5e1; /* Slate-300 */
+  border: 2px solid #cbd5e1;
   border-radius: 50%;
-  width: 16px;
-  height: 16px;
-  margin-right: 10px;
-  position: relative;
+  width: 18px;
+  height: 18px;
+  display: inline-block; /* important */
+  position: relative; /* needed for pseudo element */
+  vertical-align: middle; /* <<< IMPORTANT! */
 }
 
-#folder-selection-form input[type="radio"]:checked {
-  border: 5px solid #4f46e5; /* Indigo-600 */
+#folder-selection-form input[type="radio"]::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  transform: scale(0);
+  background-color: #4f46e5;
+  transition: transform 0.2s ease;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0); /* Center inside circle */
 }
 
-#folder-selection-form input[type="radio"]:hover {
-  border-color: #4f46e5;
+#folder-selection-form input[type="radio"]:checked::before {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+
+/* Fade animation */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

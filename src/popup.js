@@ -6,12 +6,19 @@ import { ACTIONS } from "./constants.js";
 const runButton = document.getElementById("run-button");
 const outputDiv = document.getElementById("output");
 
+// Start by hiding the empty output. TODO: Do in a better way.
+outputDiv.classList.remove('active');
+outputDiv.innerHTML = '';
+
 runButton.disabled = false;
+
+
 
 runButton.addEventListener("click", async () => {
   try {
     runButton.disabled = true;
-    outputDiv.innerText = "Running... If this is the first time, it could take a few minutes to download the model...";
+    outputDiv.classList.add('active');
+    outputDiv.innerText = "Reading the page... If this is the first time, it could take a few minutes to download the model...";
 
     // Get active tab
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
