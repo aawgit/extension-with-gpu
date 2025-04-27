@@ -5,6 +5,7 @@ import { ACTIONS } from "./constants.js";
 
 const runButton = document.getElementById("run-button");
 const outputDiv = document.getElementById("output");
+const homeButton = document.getElementById('home-button');
 
 // Start by hiding the empty output. TODO: Do in a better way.
 outputDiv.classList.remove('active');
@@ -19,17 +20,19 @@ runButton.addEventListener("click", async () => {
     runButton.disabled = true;
     outputDiv.classList.add('active');
     const loadingMessage = "Reading the page... If this is the first time, it could take a few minutes to download the model."
-    outputDiv.innerText = loadingMessage;
 
-     // Start dots animation
-     let dotCount = 0;
-     const maxDots = 3;
-     const baseText = loadingMessage;
-     const loadingInterval = setInterval(() => {
-       dotCount = (dotCount + 1) % (maxDots + 1);
-       outputDiv.innerText = baseText + '.'.repeat(dotCount);
-     }, 500);
+    // Create spinner
+    const spinner = document.createElement("div");
+    spinner.classList.add("spinner");
 
+    // Create loading message
+    const messageSpan = document.createElement("span");
+    messageSpan.textContent = loadingMessage;
+
+    // Add spinner and message to output
+    outputDiv.appendChild(messageSpan);
+    outputDiv.appendChild(spinner);
+   
 
     // Get active tab
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -52,7 +55,7 @@ runButton.addEventListener("click", async () => {
     };
 
     const response = await chrome.runtime.sendMessage(message);
-    clearInterval(loadingInterval);
+
     console.log(JSON.stringify(response))
     const { suggestedFolderName, isExistingFolder, allFolders } = response;
     outputDiv.innerText = "";
@@ -144,3 +147,10 @@ function showFolderSelection(folders, pageContent) {
   outputDiv.appendChild(confirmButton);
 }
 
+
+homeButton.addEventListener('click', () => {
+  outputDiv.innerHTML = '';
+  outputDiv.classList.remove('active');
+  runButton.disabled = false;
+  homeButton.style.display = 'none'; // hide Home button again
+});

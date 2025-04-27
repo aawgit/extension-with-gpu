@@ -132,3 +132,46 @@ button:disabled {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+/* Spinner */
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 3px solid #cbd5e1; /* Light part */
+  border-top: 3px solid #4f46e5; /* Colored part */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Adjust output text */
+#output span {
+  vertical-align: middle;
+}
+
+#home-button {
+  padding: 8px 16px;
+  background-color: #e5e7eb; /* Light gray */
+  color: #374151; /* Slate-700 */
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  margin: 5px;
+  transition: background-color 0.2s ease;
+}
+
+#home-button:hover {
+  background-color: #d1d5db; /* Slightly darker gray */
+}
+
+#home-button:active {
+  transform: scale(0.97);
+}
