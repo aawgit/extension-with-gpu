@@ -18,7 +18,18 @@ runButton.addEventListener("click", async () => {
   try {
     runButton.disabled = true;
     outputDiv.classList.add('active');
-    outputDiv.innerText = "Reading the page... If this is the first time, it could take a few minutes to download the model...";
+    const loadingMessage = "Reading the page... If this is the first time, it could take a few minutes to download the model."
+    outputDiv.innerText = loadingMessage;
+
+     // Start dots animation
+     let dotCount = 0;
+     const maxDots = 3;
+     const baseText = loadingMessage;
+     const loadingInterval = setInterval(() => {
+       dotCount = (dotCount + 1) % (maxDots + 1);
+       outputDiv.innerText = baseText + '.'.repeat(dotCount);
+     }, 500);
+
 
     // Get active tab
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -41,6 +52,7 @@ runButton.addEventListener("click", async () => {
     };
 
     const response = await chrome.runtime.sendMessage(message);
+    clearInterval(loadingInterval);
     console.log(JSON.stringify(response))
     const { suggestedFolderName, isExistingFolder, allFolders } = response;
     outputDiv.innerText = "";

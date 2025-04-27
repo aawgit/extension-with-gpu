@@ -87,7 +87,7 @@ button:disabled {
 #folder-selection-form label {
   display: flex;
   align-items: center; /* aligns vertically */
-  gap: 10px;
+  gap: 12px;
   font-size: 14px;
   font-weight: 500;
   color: #374151;
