@@ -8,7 +8,6 @@ transformers.js-examples/browser-extension/
 - **Analyzes** the web page and suggests a suitable **bookmark folder**.
 - Allows users to **manually select** a folder if needed.
 - **Lightweight, fast, and private** — no server communication.
-- Beautiful, clean UI with a modern loading animation.
 
 ---
 
@@ -16,7 +15,7 @@ transformers.js-examples/browser-extension/
 
 - **Google Chrome** or **Chromium-based browsers** (tested on Chrome).
 - **Chrome version 113 or newer** is recommended (for stable WebGPU support).
-- **A GPU and support for WebGPU** This can be checked from here: [text](https://webgpureport.org/)
+- **A GPU and support for WebGPU** This can be checked from here: [webgpureport](https://webgpureport.org/)
 
 ---
 
@@ -31,9 +30,7 @@ You need to enable WebGPU manually:
 3. Set it to **Enabled**.
 4. Restart Chrome.
 
-Additionally:
-- Make sure **WebGL** is enabled (usually on by default).
-- If you still encounter issues, try launching Chrome with the `--enable-unsafe-webgpu` flag (only if absolutely necessary).
+If you still encounter issues, try launching Chrome with the `--enable-unsafe-webgpu` flag (only if absolutely necessary).
 
 ---
 
@@ -48,7 +45,7 @@ Additionally:
 6. Navigate to any page → click the extension → click **"Bookmark this page"**!
 7. Select the suggested folder or pick one manually.
 
-The models used in this extension are approximately 1 GB in size. On slower internet connections, the download process may take a significant amount of time and could occasionally result in errors.
+The models used in this extension are approximately 1 GB in size in total. On slower internet connections, the download process may take a significant amount of time and could occasionally result in errors.
 If the loading state seems to persist for too long, you can inspect the console logs by right-clicking on the panel and selecting "Inspect".
 If you encounter any issues or suspect a bug, please feel free to open an issue — contributions and feedback are always welcome!
 

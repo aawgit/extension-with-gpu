@@ -19,6 +19,7 @@ runButton.addEventListener("click", async () => {
   try {
     runButton.disabled = true;
     outputDiv.classList.add('active');
+    homeButton.style.display = 'block';
     const loadingMessage = "Reading the page... If this is the first time, it could take a few minutes to download the model."
 
     // Create spinner

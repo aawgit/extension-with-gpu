@@ -11,11 +11,6 @@
 // const response = await chrome.runtime.sendMessage(message);
 // console.log('received user data', response)
 
-let pageText = document.body.innerText || "";
-let pageTitle = document.title || "";
-let pageBody = document.body.textContent | "";
-let url =  window.location.href
-
 // // TODO: Extract headings
 // chrome.runtime.sendMessage({
 //     type: "tabData",
@@ -26,7 +21,10 @@ let url =  window.location.href
 // });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "GET_PAGE_CONTENT") {
-      sendResponse({ text: pageText.substring(0, 200),  url: url, title: pageTitle});
-    }
-  });
+  let pageText = document.body.innerText || "";
+  let pageTitle = document.title || "";
+  let url = window.location.href
+  if (request.action === "GET_PAGE_CONTENT") {
+    sendResponse({ text: pageText.substring(0, 200), url: url, title: pageTitle });
+  }
+});
