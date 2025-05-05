@@ -2,6 +2,8 @@
 This is based on the example project to show how to run 🤗 Transformers in a browser extension.  https://github.com/huggingface/transformers.js-examples.git
 transformers.js-examples/browser-extension/
 
+**Demo:** [Video](https://youtu.be/aMSOfxKSqaM?si=kCLv1xNcrihKxTte)
+
 ## 🚀 Features
 
 - Runs a lightweight **transformers model** entirely in your browser (no backend needed!).
